@@ -9,7 +9,6 @@ Design an eBay-like e-commerce auction site that will allow users to post auctio
 # Languages
 
 - [x] Python
-- [x] JavaScript
 - [x] HTML
 - [x] CSS
 
