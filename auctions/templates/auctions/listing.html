@@ -1,0 +1,90 @@
+{% extends "auctions/layout.html" %}
+{% block body %}
+    <div class="listing">
+        <div class="listing-f-div">
+            <div class="listing-f-div">
+                <h1>{{ listing.title }}</h1>
+                {% if user.is_authenticated %}
+                    <form action="{% url 'listing' listing.id %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="listingId" value="{{ listing.id }}">
+                        <input type="hidden" name="type" value="b">
+                        {{ formAddWatchlist }}
+                        <input type="submit" value="Save">
+                    </form>
+                {% endif %}
+            </div>
+            {% if isMineBid and not listing.is_closed %}
+                <form action="{% url 'listing' listing.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="type" value="d">
+                    <input type="submit" value="Close">
+                </form>
+            {% endif %}
+        </div>
+        <form action="{% url 'listing' listing.id %}" method="POST" class="listing-f-form">
+            {% csrf_token %}
+            <input type="hidden" name="type" value="a">
+            <div class="listing-f-form-imgdiv">
+                <img src="{{listing.url_image}}" alt="No Image">
+            </div>
+            <div>
+                {% if not listing.is_closed %}
+                    {% if currentBid %}
+                        <span>({{ bidsLen }}) bids. </span>
+                        {% if isMeCurrentBid %}
+                            <span>Your bid is the current bid </span>
+                        {% endif %}
+                        <br>
+                        <h4><strong>${{ currentBid.price }}</strong></h4>
+                        <br>
+                    {% else %}
+                        <span>(0) bids</span>
+                        <br>
+                        <span><strong>${{ listing.initial_price }}</strong></span>
+                        <br>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                        <input type="number" name="price">
+                        <input type="submit" value="Place Bid">
+                        <br>
+                        <span class="listing-f-form-error">{{ errorBid }}</span>
+                    {% endif %}
+                {% else %}
+                    {% if currentBid %}
+                        <span>This listing is closed. <strong>{{ currentBid.user.username }}</strong> won the bid.</span>
+                        <br>
+                        <span>Final bid: <strong>${{ currentBid.price }}</strong></span>
+                    {% else %}
+                        <span>This listing is closed.</span>
+                        <br>
+                        <span>There was no bid.</strong></span>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </form>
+        <hr>
+        <div>
+            <h2>Item Overview</h2>
+            <p>Description</p>
+            <span>{{ listing.description }}</span>
+        </div>
+        <hr>
+        <div>
+            <h2>Comments</h2>
+            {% if user.is_authenticated %}
+                <form action="{% url 'listing' listing.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="type" value="c">
+                    <input type="text" name="comment">
+                    <input type="submit" value="Add a comment">
+                </form>
+            {% endif %}
+            <hr>
+            {% for comment in comments %}
+                <p><strong>{{ comment.user.username }}: </strong>{{ comment.comment }}</p>
+                <hr>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
